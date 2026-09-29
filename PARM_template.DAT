@@ -1,0 +1,21 @@
+#	Parameter Description SpreadSheet				
+# See .pdf file for an explanation of each field					
+#					
+# Starting Integration Time	Maximum Integration Time	Ea UNITS (Kcal, KJ,J,CAL,K)	Conc. Units(moles/L, moles/cc, molecules/cc)	X0	
+0.0000001	0.001	KCAL	MOLES/LITER	0
+#			External Heat Source/Sink # OR Profile (Filename) 		
+#Temperature (K) or Filename	Pressure (Constant ? (Yes/No) )	Volume Profile (Filename/No)	OR Condutance:Extern. Temp OR Conductance:Ext.Temp. Profile (Filename)	X0	
+298	NOPE	NO	No	0	
+# Simulation Length:					
+#       DAYS	Hours	Minutes	Seconds	PicoSeconds	
+0	0	0	_HRT_	0
+#                                                       				
+#hv(filename)	Sampling Interval (s)	Percent(%)	Accuracy	X0	
+None1	_SAMP_INT_	0	0.000001	0
+#  THESE FIELDS BELOW (X0) ARE CURRENTLY NOT USED, LEAVE THEM AT 0					
+# CSTR/PFR inlet Flow Temperature	X0	X0	X0	X0	
+0	0	0	0	0	
+#					
+END
+
+

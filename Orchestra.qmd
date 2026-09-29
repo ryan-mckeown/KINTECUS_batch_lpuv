@@ -1,0 +1,95 @@
+---
+title: "UV/AOP Kintecus Pipeline"
+format:
+  html:
+    toc: true
+    code-fold: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+# run every chunk from this file's own folder
+knitr::opts_knit$set(root.dir = dirname(knitr::current_input(dir = TRUE)))
+library(dplyr); library(ggplot2); library(purrr)
+```
+
+## Run the simulations
+
+```{r run}
+source("run_model.R")
+```
+
+## Summary
+
+```{r summary}
+files <- list.files(pattern = "^CONC_Exp_.*\\.csv$")
+stopifnot(length(files) > 0)
+
+summarise_run <- function(f) {
+  d  <- read.csv(f, check.names = FALSE)
+  tibble(
+    Exp_ID    = sub("^CONC_Exp_|\\.csv$", "", f),
+    C0        = d$DIOXANE[1],
+    C_final   = tail(d$DIOXANE, 1),
+    Deg_pct   = round((1 - tail(d$DIOXANE, 1) / d$DIOXANE[1]) * 100, 2),
+    LRV       = round(tail(d$LRV, 1), 3),
+    Fluence   = round(tail(d$Fluence_mJ_cm2, 1)),
+    I_ratio   = round(tail(d$I_ratio, 1), 4),
+    k_H2O2_0  = d$k_photo_H2O2[1],
+    k_H2O2_f  = tail(d$k_photo_H2O2, 1)
+  )
+}
+
+summary_df <- map_dfr(files, summarise_run)
+write.csv(summary_df, "Master_Degradation_Summary.csv", row.names = FALSE)
+knitr::kable(summary_df)
+```
+
+## Trajectories
+
+```{r plots, fig.width=8, fig.height=4.5}
+runs <- map_dfr(files, function(f) {
+  d <- read.csv(f, check.names = FALSE)
+  names(d)[1] <- "Time"
+  d$Exp_ID <- sub("^CONC_Exp_|\\.csv$", "", f)
+  d
+})
+
+ggplot(runs, aes(Fluence_mJ_cm2, LRV, colour = Exp_ID)) +
+  geom_line(linewidth = 1) +
+  labs(x = "UV fluence (mJ/cm2)", y = "LRV (1,4-dioxane)") +
+  theme_minimal()
+
+ggplot(runs, aes(Time, `HCO3-`, colour = Exp_ID)) +
+  geom_line(linewidth = 1) +
+  labs(title = "Carbonate buffer (must stay ~flat)",
+       x = "Time (s)", y = "[HCO3-] (M)") +
+  theme_minimal()
+```
+
+## Compare against the target model
+
+Drop `target_model.xlsx` beside this file to enable this section.
+
+```{r compare, eval=file.exists("target_model.xlsx")}
+library(readxl)
+tgt <- read_excel("target_model.xlsx", sheet = 1) |>
+  slice(-1) |>                                   # units row
+  mutate(across(everything(), as.numeric)) |>
+  rename(Time = Chemicals)
+
+# target name -> our name
+map <- c("1,4-dioxane" = "DIOXANE", "H2O2" = "H2O2", "NH2Cl" = "NH2Cl",
+         "NHCl2" = "NHCl2", "HCO3-" = "HCO3-", "H2CO3" = "H2CO3",
+         "●OH" = "HO*", "Cl-" = "Cl-", "TOC" = "TOC")
+
+one <- runs |> filter(Exp_ID == first(Exp_ID))
+at  <- function(d, tc, vc, t) approx(d[[tc]], d[[vc]], t, rule = 2)$y
+
+cmp <- expand.grid(t = c(1, 5, 10, 20, 30), sp = names(map),
+                   stringsAsFactors = FALSE) |>
+  mutate(target = mapply(function(s, tt) at(tgt, "Time", s, tt), sp, t),
+         ours   = mapply(function(s, tt) at(one, "Time", map[[s]], tt), sp, t),
+         ratio  = round(ours / target, 3))
+knitr::kable(cmp, digits = 8)
+```

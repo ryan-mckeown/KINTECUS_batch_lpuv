@@ -1,0 +1,183 @@
+# Model Description SpreadSheet
+# Reactions converted from Excel (h2o2_model_eqs.xlsx)
+# k	Reaction
+
+
+# --- Photolysis ---
+_K_NH2CL_	NH2Cl ==> NH2* + Cl*
+_K_NHCL2_	NHCl2 ==> NHCl* + Cl*
+_K_H2O2_	H2O2 ==> 2HO*
+_K_OCL_	OCl- ==> Cl* + O*-
+_K_HOCL_	HOCl ==> Cl* + HO*
+
+# --- Breakpoint ---
+
+_K_201_	HOCl + NH3 ==> NH2Cl + H2O
+_K_202_	NH2Cl ==> HOCl + NH3
+_K_203_	HOCl + NH2Cl ==> NHCl2 + H2O
+6.39E-07	NHCl2 ==> HOCl + NH2Cl
+
+_K_205_	2NH2Cl ==> NHCl2 + NH3
+# NOTE: no formula supplied for this reverse-disproportionation reaction -- kept as static literature value, unchanged. Flag for follow-up.
+6.11E+04	NHCl2 + NH3 ==> 2NH2Cl
+_K_207_	NHCl2 ==> NOH + 2H+ + 2Cl-
+2.78E+04	NOH + NHCl2 ==> HOCl + N2 + H+
+8.33E+03	NOH + NH2Cl ==> N2 + H+ + Cl-
+#0.00E+00	NH2Cl + NHCl2 ==> N2 + 3H+ + 3Cl-
+
+_K_211_	HOCl + NHCl2 ==> NCl3 + H2O
+_K_212_	NHCl2 + NCl3 ==> 2HOCl + N2 + 3H+
+_K_213_	NH2Cl + NCl3 ==> HOCl + N2 + 3H+
+_K_214_	NHCl2 + 2HOCl ==> NO3- + 5H+ + 4Cl-
+_K_215_	NCl3 ==> NHCl2 + HOCl
+1.41E+03	HOCl ==> OCl- + H+
+5.00E+10	OCl- + H+ ==> HOCl
+4.20E+01	NH4+ ==> NH3 + H+
+8.40E+10	NH3 + H+ ==> NH4+
+
+# --- Carbonate ---
+1.00E+10	HCO3- + H+ ==> H2CO3
+
+# Reverted to 5.00E+05 (kinetic pKa1 = 4.30 against k_assoc = 1.00E+10).
+# The target model uses this pair: its carbonate starts at the pK1=6.32
+# speciation and re-equilibrates to H2CO3/HCO3- = 0.048 within the first
+# timestep, conserving total carbonate. 4.30 is also the correct pKa for
+# TRUE H2CO3 (pK1=6.32 is for H2CO3* = CO2(aq) + H2CO3).
+# The earlier pH crash this was 'fixing' came from the H2CO3 initial-
+# concentration bug, not from this rate constant.
+
+5.00E+05	H2CO3 ==> HCO3- + H+
+5.00E+10	CO3-- + H+ ==> HCO3-
+2.50E+00	HCO3- ==> CO3-- + H+
+
+# --- 1,4-D ---
+3.10E+09	DIOXANE + HO* ==> X
+4.40E+06	DIOXANE + Cl* ==> X
+3.30E+06	DIOXANE + Cl2*- ==> X
+
+# --- TOC ---
+3.96E+08	HO* + TOC ==> X
+1.56E+08	Cl* + TOC ==> X
+#0.00E+00	ClO* + TOC ==> X
+6.96E+05	CO3*- + TOC ==> X
+
+# --- MT ---
+8.10E+09	Cl* + Cl- ==> Cl2*-
+1.66E+05	Cl* ==> ClOH*- + H+
+1.50E+09	Cl* + H2O2 ==> HO2* + Cl- + H+
+1.80E+10	Cl* + OH- ==> ClOH*-
+2.10E+09	Cl2*- + Cl* ==> Cl2 + Cl-
+7.00E+02	Cl2*- ==> Cl- + ClOH*- + H+
+7.57E+04	Cl2*- ==> Cl* + Cl-
+5.46E+08	NH2* + O2 ==> NH2O2*
+4.30E+09	HO* + Cl- ==> ClOH*-
+2.70E+07	HO* + H2O2 ==> HO2* + H2O
+2.20E+09	2Cl2*- ==> Cl2 + 2Cl-
+1.00E+04	ClOH*- + Cl- ==> Cl2*- + OH-
+3.02E+10	ClOH*- + H+ ==> Cl* + H2O
+6.10E+09	ClOH*- ==> Cl- + HO*
+3.00E+00	HO2* + H2O2 ==> O2 + HO* + H2O
+9.70E+07	HO2* + O2*- ==> O2 + HO2-
+#1.58E+03	HOCl ==> OCl- + H+ duplicate of like 52
+1.30E-01	O2*- + H2O2 ==> O2 + HO* + OH-
+1.70E+05	OCl- + H2O2 ==> Cl- + H2O + O2
+1.10E+04	HOCl + H2O2 ==> H+ + Cl- + O2
+1.10E+09	NO* + NO2* ==> N2O3
+4.50E+08	2NO2* ==> N2O4
+1.38E+03	N2O3 ==> 2NO2- + 2H+
+1.47E+06	N2O3 ==> NO* + NO2*
+6.50E+02	N2O4 ==> NO2- + NO3- + 2H+
+5.12E+08	NH2Cl + Cl* ==> NHCl* + Cl- + H+
+6.50E+06	NH2Cl + Cl2*- ==> NHCl* + 2Cl- + H+
+1.16E+09	NH2Cl + HO* ==> NHCl* + H2O
+1.00E+08	NH2O2* ==> NO* + H2O
+5.98E+08	NH2O2* ==> N2O + X
+4.39E+08	NHCl2 + HO* ==> NCl2* + H2O
+7.65E+09	NO2- + HO* ==> NO2* + OH-
+
+# --- M ---
+1.00E+09	Cl2*- + HO* ==> HOCl + Cl-
+1.40E+05	Cl2*- + H2O2 ==> HO2* + 2Cl- + H+
+3.00E+09	Cl2*- + HO2* ==> 2Cl- + H+ + O2
+2.00E+09	Cl2*- + O2*- ==> 2Cl- + O2
+4.50E+07	Cl2*- + OH- ==> ClOH*- + Cl-
+1.20E+08	NHCl* + O2 ==> NHClO2*
+1.00E+10	NO* + HO* ==> NO2- + H+
+7.50E+09	HO* + HO2- ==> HO2* + OH-
+6.60E+09	HO* + HO2* ==> O2 + H2O
+7.00E+09	HO* + O2*- ==> O2 + OH-
+1.20E+10	HO* + OH- ==> O*- + H2O
+8.80E+07	2Cl* ==> Cl2
+2.10E+06	2NO* + O2 ==> 2NO2*
+5.50E+09	2HO* ==> H2O2
+8.30E+05	2HO2* ==> O2 + H2O2
+2.00E+04	Cl2 + Cl- ==> Cl3-
+1.50E+01	Cl2 ==> HOCl + Cl- + H+
+1.30E+04	Cl2 + H2O2 ==> 2H+ + O2 + 2Cl-
+1.00E+09	Cl2 + HO2* ==> Cl2*- + H+ + O2
+1.00E+09	Cl2 + O2*- ==> Cl2*- + O2
+1.00E+09	Cl3- + HO2* ==> Cl2*- + H+ + O2
+3.80E+09	Cl3- + O2*- ==> Cl2*- + Cl- + O2
+1.10E+05	Cl3- ==> Cl2 + Cl-
+5.00E+10	H+ + HO2- ==> H2O2
+1.00E+11	H+ + OH- ==> H2O
+1.26E-01	H2O2 ==> H+ + HO2-
+7.50E+06	HOCl + HO2* ==> Cl* + OH- + O2
+7.50E+06	HOCl + O2*- ==> Cl* + OH- + O2
+1.36E+07	NH2Cl + H+ + NO2- ==> NH3 + NO2Cl + NO3-
+1.00E+09	NHCl2 + Cl* ==> NCl2* + Cl- + H+
+4.40E+06	NHCl2 + Cl2*- ==> NCl2* + 2Cl- + H+
+1.00E+08	NHClO2* ==> NO* + X
+6.70E+08	NHClO2* ==> N2O + X
+2.00E+08	OCl- + O2*- ==> Cl* + 2OH- + O2
+1.00E+08	HClOH* ==> ClOH*- + H+
+1.00E+06	HO* + H2CO3 ==> CO3*- + H2O + H+
+3.00E+09	HO* + CO3*- ==> X
+3.00E+07	CO3*- + HO2- ==> HCO3- + O2*-
+3.00E+07	2CO3*- ==> X
+8.50E+06	HO* + HCO3- ==> CO3*- + H2O
+3.90E+08	HO* + CO3-- ==> CO3*- + OH-
+4.30E+05	CO3*- + H2O2 ==> HCO3- + HO2*
+
+# --- Trojan ---
+#0.00E+00	Cl2*- + ClO2- ==> ClO2* + 2Cl-
+#0.00E+00	Cl* + CO3-- ==> CO3*- + Cl-
+#0.00E+00	Cl* + HCO3- ==> CO3*- + H+ + Cl-
+#1.50E+10	NO* + HO* ==> HNO2 #duplicate of line 115
+5.00E+01	NO* + O2 ==> ONOO*
+5.00E+08	NO* + ONOO* ==> 2NO2*
+#0.00E+00	2ClO* ==> Cl2O2
+8.00E+06	2HNO ==> N2O + H2O
+#0.00E+00	Cl2O2 + ClO2- + Cl- ==> 2ClO2* + 2Cl-
+#0.00E+00	Cl2O2 + ClO2- + H2O ==> ClO3- + 2HOCl
+#0.00E+00	Cl2O2 ==> 2ClO*
+#0.00E+00	ClO* + ClO2- ==> ClO2* + OCl-
+#0.00E+00	ClO2- + HOCl + Cl- ==> ClO3- + 2Cl- + H+
+#0.00E+00	ClO2- + HOCl + H+ ==> Cl2O2 + H2O
+#0.00E+00	ClO2* + Cl2*- ==> Cl2O2 + Cl-
+#0.00E+00	ClO2* + HO* ==> ClO3- + H+
+#0.00E+00	ClO2* + ClO* ==> Cl2O3
+#0.00E+00	ClOH*- ==> Cl* + OH-
+2.76E-02	H2O2 + NH2Cl ==> X
+7.90E+05	HO2* ==> O2*- + H+
+8.80E+08	HOCl + HO* ==> ClO* + H2O
+7.40E+03	HOCl + NO2- ==> NO2Cl + OH-
+6.90E+03	N2O4 ==> 2NO2*
+1.67E+08	NCl3 + HO* ==> NCl2* + HOCl
+7.60E+06	NH2Cl + H+ + NO2- ==> NO2Cl + NH3
+#0.00E+00	NO2- + Cl* ==> NO2* + Cl-
+#0.00E+00	NO2Cl ==> NO3- + Cl- + 2H+
+#0.00E+00	NO2Cl + NO2- ==> N2O4 + Cl-
+5.00E+10	O2*- + H+ ==> HO2*
+#0.00E+00	OCl- + Cl* ==> ClO* + Cl-
+#0.00E+00	OCl- + HO* ==> ClO* + OH-
+4.80E+09	ONOO- + HO* ==> ONOO* + OH-
+5.00E+10	ONOO- + H+ ==> ONOOH
+8.00E-06	ONOO- ==> NO3-
+2.00E-02	ONOO- ==> O2*- + NO*
+6.50E+03	ONOO* ==> NO* + O2
+2.91E-01	ONOOH ==> NO2* + HO*
+1.26E-01	ONOOH ==> H+ + ONOO-
+5.68E-01	ONOOH ==> NO3- + H+
+
+END

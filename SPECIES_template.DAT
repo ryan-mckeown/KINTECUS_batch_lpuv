@@ -1,0 +1,69 @@
+# Species registry for the UV/AOP model.
+# One species per line. run_model.R reads ONLY this list and writes
+# SPECIES.DAT itself, supplying every initial concentration from the
+# current substep's state -- so there are no _0 placeholders here and
+# no species can be silently reset to zero between substeps.
+# To add a species: add it here and to MODEL_template.DAT. Nothing else.
+HO*
+DIOXANE
+X
+H2O2
+TOC
+HOCl
+OCl-
+HCO3-
+CO3--
+NH2Cl
+NHCl2
+H+
+OH-
+H2O
+O*-
+HO2*
+HO2-
+O2*-
+O2
+O3*-
+O2--
+ClO*
+O3
+O4--
+ClO2
+ClO3-
+ClO2-
+H2CO3
+CO3*-
+Cl*
+Cl-
+Cl2
+Cl2*-
+Cl2O2
+Cl2O3
+Cl3-
+ClO2*
+ClOH*-
+HClOH*
+HNO
+HNO2
+N2
+N2O
+N2O3
+N2O4
+NCl2*
+NCl3
+NH2*
+NH2O2*
+NH3
+NH4+
+NHCl*
+NHClO2*
+NO*
+NO2*
+NO2-
+NO2Cl
+NO3-
+NOH
+ONOO*
+ONOO-
+ONOOH
+END
