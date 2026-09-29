@@ -16,7 +16,9 @@ CONST <- list(
   MW_N      = 14.01,
   MW_Cl     = 35.453,
   MW_C      = 12.011,
-  MW_O2     = 31.998
+  MW_O2     = 31.998,
+  MW_H2O2   = 34.0147,  # mg/L as H2O2 -> M
+  MW_DIOX   = 88.106    # 1,4-dioxane C4H8O2, ug/L -> M
 )
 
 # 254 nm molar absorptivity (L/mol/cm) and quantum yield (mol/Einstein)
@@ -113,8 +115,8 @@ k_breakpoint <- function(T_K, conc) {
     k202 = 1.38e8 * exp(-8800 / T_K),                      # NH2Cl -> HOCl + NH3
     k203 = 3.0e5  * exp(-2010 / T_K),                      # HOCl + NH2Cl -> NHCl2
     k205 = (3.78e10 * exp(-2169  / T_K) / 3600) * H +      # 2NH2Cl -> NHCl2 + NH3
-      (0.87    * exp(-503   / T_K) / 3600) * HCO3 +
-      (2.52e25 * exp(-16860 / T_K) / 3600) * H2CO3,
+           (0.87    * exp(-503   / T_K) / 3600) * HCO3 +
+           (2.52e25 * exp(-16860 / T_K) / 3600) * H2CO3,
     k207 = 167 * OH,                                        # NHCl2 -> NOH + 2H+ + 2Cl-
     k211 = 3.28e9 * OH + 9.00e4 * (10^-7.5 * HOCl / H) + 6.00e6 * CO3,
     k212 = 5.56e10 * OH,                                   # NHCl2 + NCl3

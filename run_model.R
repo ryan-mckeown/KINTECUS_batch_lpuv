@@ -53,6 +53,15 @@ experiments <- read_excel("kintecus_experimental_batch.xlsx")
 col <- function(nm, i, default = 0)
   if (nm %in% names(experiments)) num(experiments[[nm]][i], default) else default
 
+# H2O2 and 1,4-dioxane are dosed in mass units (mg/L and ug/L).  The older
+# molar columns (H2O2_0, DIOXANE_0) are still honoured so existing workbooks
+# keep running, but the mass column wins whenever both are present.
+# `per` is the mass-unit divisor: 1e3 for mg/L, 1e6 for ug/L.
+dose_M <- function(i, mass_col, molar_col, mw, per) {
+  if (mass_col %in% names(experiments)) col(mass_col, i) / per / mw
+  else col(molar_col, i)
+}
+
 for (i in seq_len(nrow(experiments))) {
   id   <- experiments$Exp_ID[i]
   hrt  <- col("HRT", i, 1); E_avg <- col("E_avg", i)
@@ -64,14 +73,19 @@ for (i in seq_len(nrow(experiments))) {
   } else 298.15
   if (path <= 0) stop(sprintf("Exp %s: path_length must be > 0", id))
 
+  H2O2_0 <- dose_M(i, "H2O2_mgL",    "H2O2_0",    CONST$MW_H2O2, 1e3)
+  DIOX_0 <- dose_M(i, "DIOXANE_ugL", "DIOXANE_0", CONST$MW_DIOX, 1e6)
+  if (DIOX_0 <= 0)
+    warning(sprintf("Exp %s: 1,4-dioxane dose is zero -- LRV will be undefined", id))
+
   # every species starts at zero, then the dosed ones are filled in
   conc <- setNames(numeric(length(SPECIES)), SPECIES)
   seed <- c(free_chlorine(pH, col("FAC_mgL", i)),
             carbonate(pH, col("Alk_mgL", i)),
             ammonia(pH, col("NH3_mgL_N", i)),
             chloramines(col("NH2Cl_mgL", i), col("NHCl2_mgL", i)),
-            c(H2O2    = col("H2O2_0", i),
-              DIOXANE = col("DIOXANE_0", i),
+            c(H2O2    = H2O2_0,
+              DIOXANE = DIOX_0,
               H2O     = 55.56,
               `H+`    = 10^-pH,
               `OH-`   = 10^(pH - CONST$pKw),
@@ -92,6 +106,11 @@ for (i in seq_len(nrow(experiments))) {
 
   cat(sprintf("\n=== %s | %.1f s | pH %.2f | %.2f cm | %.1f K | A_bg %.5f ===\n",
               id, hrt, pH, path, T_K, A_bg))
+  # echoed back in mass units whichever basis was supplied -- a cheap check
+  # that the workbook was read the way you meant it
+  cat(sprintf("    H2O2 %.4g mg/L (%.4e M) | 1,4-D %.4g ug/L (%.4e M)\n",
+              H2O2_0 * 1e3 * CONST$MW_H2O2, H2O2_0,
+              DIOX_0 * 1e6 * CONST$MW_DIOX, DIOX_0))
 
   history <- list(); t_now <- 0
   while (t_now < hrt - 1e-9) {
@@ -145,8 +164,9 @@ for (i in seq_len(nrow(experiments))) {
   # I ratio on every row.  Because I_ratio rises, this product sits ~1% above
   # the integral of the same trajectory.
   run$Fluence_mJ_cm2 <- E_avg * run$I_ratio * run[[tcol]]
-  c0 <- num(experiments[["DIOXANE_0"]][i])
-  run$LRV <- ifelse(run$DIOXANE > 0, log10(c0 / run$DIOXANE), NA)
+  # baseline reuses the seeded value -- never re-read from the workbook, so
+  # the LRV denominator cannot drift from what was actually dosed
+  run$LRV <- ifelse(run$DIOXANE > 0, log10(DIOX_0 / run$DIOXANE), NA)
 
   f <- sprintf("CONC_Exp_%s.csv", id)
   write.csv(run, f, row.names = FALSE)
