@@ -80,7 +80,6 @@ _K_215_	NCl3 ==> NHCl2 + HOCl
 6.10E+09	ClOH*- ==> Cl- + HO*
 3.00E+00	HO2* + H2O2 ==> O2 + HO* + H2O
 9.70E+07	HO2* + O2*- ==> O2 + HO2-
-#1.58E+03	HOCl ==> OCl- + H+ duplicate of like 52
 1.30E-01	O2*- + H2O2 ==> O2 + HO* + OH-
 1.70E+05	OCl- + H2O2 ==> Cl- + H2O + O2
 1.10E+04	HOCl + H2O2 ==> H+ + Cl- + O2
@@ -91,7 +90,7 @@ _K_215_	NCl3 ==> NHCl2 + HOCl
 6.50E+02	N2O4 ==> NO2- + NO3- + 2H+
 5.12E+08	NH2Cl + Cl* ==> NHCl* + Cl- + H+
 6.50E+06	NH2Cl + Cl2*- ==> NHCl* + 2Cl- + H+
-# OH + NH2Cl: fitted to the 34-run pilot set with TOC held constant and M1W TOC = 0.28 mg/L
+# HO* + NH2Cl: fitted to the 34-run pilot set with TOC held constant and M1W TOC = 0.28 mg/L
 # (grid 5.5E+08-8.5E+08; minimum RMSE and slope = 1 both at ~6.75E+08; original value 1.16E+09).
 # Measured values: 5.2E+08 (Poskrebyshev et al. 2003), 6.06E+08 (Gleason et al. 2017).
 6.75E+08	NH2Cl + HO* ==> NHCl* + H2O
@@ -148,7 +147,6 @@ _K_215_	NCl3 ==> NHCl2 + HOCl
 #0.00E+00	Cl2*- + ClO2- ==> ClO2* + 2Cl-
 #0.00E+00	Cl* + CO3-- ==> CO3*- + Cl-
 #0.00E+00	Cl* + HCO3- ==> CO3*- + H+ + Cl-
-#1.50E+10	NO* + HO* ==> HNO2 #duplicate of line 115
 5.00E+01	NO* + O2 ==> ONOO*
 5.00E+08	NO* + ONOO* ==> 2NO2*
 #0.00E+00	2ClO* ==> Cl2O2
