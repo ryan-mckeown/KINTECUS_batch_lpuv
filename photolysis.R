@@ -117,6 +117,7 @@ k_breakpoint <- function(T_K, conc) {
     k205 = (3.78e10 * exp(-2169  / T_K) / 3600) * H +      # 2NH2Cl -> NHCl2 + NH3
            (0.87    * exp(-503   / T_K) / 3600) * HCO3 +
            (2.52e25 * exp(-16860 / T_K) / 3600) * H2CO3,
+    k206 = (2.2e8 / 3600) * H,                              # NHCl2 + NH3 + H+ -> 2NH2Cl (J&V 1992, acid-catalysed)
     k207 = 167 * OH,                                        # NHCl2 -> NOH + 2H+ + 2Cl-
     k211 = 3.28e9 * OH + 9.00e4 * (10^-7.5 * HOCl / H) + 6.00e6 * CO3,
     k212 = 5.56e10 * OH,                                   # NHCl2 + NCl3

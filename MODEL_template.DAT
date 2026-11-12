@@ -18,8 +18,8 @@ _K_203_	HOCl + NH2Cl ==> NHCl2 + H2O
 6.39E-07	NHCl2 ==> HOCl + NH2Cl
 
 _K_205_	2NH2Cl ==> NHCl2 + NH3
-# NOTE: no formula supplied for this reverse-disproportionation reaction -- kept as static literature value, unchanged. Flag for follow-up.
-6.11E+04	NHCl2 + NH3 ==> 2NH2Cl
+# k206 = 6.11E+04 M-2 s-1 * [H+] (Jafvert & Valentine 1992, 2.2E+08 M-2 h-1); computed in photolysis.R
+_K_206_	NHCl2 + NH3 ==> 2NH2Cl
 _K_207_	NHCl2 ==> NOH + 2H+ + 2Cl-
 2.78E+04	NOH + NHCl2 ==> HOCl + N2 + H+
 8.33E+03	NOH + NH2Cl ==> N2 + H+ + Cl-
@@ -56,10 +56,12 @@ _K_215_	NCl3 ==> NHCl2 + HOCl
 3.30E+06	DIOXANE + Cl2*- ==> X
 
 # --- TOC ---
-3.96E+08	HO* + TOC ==> X
-1.56E+08	Cl* + TOC ==> X
+# TOC is regenerated (not consumed) when it scavenges a radical, as in the target model.
+# Sensitivity: regenerating 75-100% of TOC gives the same fit (RMSE 0.088).
+3.96E+08	HO* + TOC ==> TOC
+1.56E+08	Cl* + TOC ==> TOC
 #0.00E+00	ClO* + TOC ==> X
-6.96E+05	CO3*- + TOC ==> X
+6.96E+05	CO3*- + TOC ==> TOC
 
 # --- MT ---
 8.10E+09	Cl* + Cl- ==> Cl2*-
@@ -89,7 +91,10 @@ _K_215_	NCl3 ==> NHCl2 + HOCl
 6.50E+02	N2O4 ==> NO2- + NO3- + 2H+
 5.12E+08	NH2Cl + Cl* ==> NHCl* + Cl- + H+
 6.50E+06	NH2Cl + Cl2*- ==> NHCl* + 2Cl- + H+
-1.16E+09	NH2Cl + HO* ==> NHCl* + H2O
+# OH + NH2Cl: fitted to the 34-run pilot set with TOC held constant and M1W TOC = 0.28 mg/L
+# (grid 5.5E+08-8.5E+08; minimum RMSE and slope = 1 both at ~6.75E+08; original value 1.16E+09).
+# Measured values: 5.2E+08 (Poskrebyshev et al. 2003), 6.06E+08 (Gleason et al. 2017).
+6.75E+08	NH2Cl + HO* ==> NHCl* + H2O
 1.00E+08	NH2O2* ==> NO* + H2O
 5.98E+08	NH2O2* ==> N2O + X
 4.39E+08	NHCl2 + HO* ==> NCl2* + H2O

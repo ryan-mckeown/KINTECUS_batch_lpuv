@@ -28,7 +28,7 @@ stopifnot(length(files) > 0)
 summarise_run <- function(f) {
   d  <- read.csv(f, check.names = FALSE)
   tibble(
-    Exp_ID    = sub("^CONC_Exp_|\\.csv$", "", f),
+    Exp_ID    = gsub("^CONC_Exp_|\\.csv$", "", f),
     C0        = d$DIOXANE[1],
     C_final   = tail(d$DIOXANE, 1),
     Deg_pct   = round((1 - tail(d$DIOXANE, 1) / d$DIOXANE[1]) * 100, 2),
@@ -51,7 +51,7 @@ knitr::kable(summary_df)
 runs <- map_dfr(files, function(f) {
   d <- read.csv(f, check.names = FALSE)
   names(d)[1] <- "Time"
-  d$Exp_ID <- sub("^CONC_Exp_|\\.csv$", "", f)
+  d$Exp_ID <- gsub("^CONC_Exp_|\\.csv$", "", f)
   d
 })
 
@@ -65,6 +65,80 @@ ggplot(runs, aes(Time, `HCO3-`, colour = Exp_ID)) +
   labs(title = "Carbonate buffer (must stay ~flat)",
        x = "Time (s)", y = "[HCO3-] (M)") +
   theme_minimal()
+```
+
+## Target vs predicted LRV
+
+Fill the `Target_LRV` column in `kintecus_experimental_batch.xlsx` to turn this
+section on. Target (observed) LRV is on the y-axis and predicted LRV on the
+x-axis, following Piñeiro et al. (2008, *Ecol. Model.* 216:316–322). Each
+panel fits target = m·predicted through the origin, so m = 1 is a perfect
+match, m < 1 means the model overpredicts and m > 1 means it underpredicts.
+The R² shown is the standard one, 1 − SS_res / SS_tot, with SS_tot taken about
+the mean of the target LRV. The no-intercept R² that `lm()` reports is
+inflated, so it isn't used here. RMSE is the root-mean-square difference
+between predicted and target LRV, i.e. the scatter about the dashed 1:1 line,
+in LRV units. The figure is also saved to `figures/LRV_target_vs_predicted.png`.
+
+```{r lrv-target, fig.width=11, fig.height=4.2}
+# Exp_ID prefix -> water sample type
+water_types <- c(MW = "M1W", OC = "OCWD")
+
+batch <- readxl::read_excel("kintecus_experimental_batch.xlsx")
+if (!"Target_LRV" %in% names(batch)) batch$Target_LRV <- NA_real_
+
+lrv <- summary_df |>
+  select(Exp_ID, Predicted_LRV = LRV) |>
+  inner_join(batch |> transmute(Exp_ID, Target_LRV = as.numeric(Target_LRV)),
+             by = "Exp_ID") |>
+  mutate(Water = unname(water_types[sub("_.*$", "", Exp_ID)])) |>
+  filter(!is.na(Water), !grepl("test", Exp_ID, ignore.case = TRUE),
+         is.finite(Target_LRV), is.finite(Predicted_LRV))
+
+if (nrow(lrv) < 2) {
+  cat("No Target_LRV values in the workbook yet -- plot skipped.\n")
+} else {
+  panels <- bind_rows(mutate(lrv, Group = "All experiments"),
+                      mutate(lrv, Group = Water)) |>
+    mutate(Group = factor(Group, c("All experiments", unname(water_types))))
+
+  fit_one <- function(d) {
+    m    <- unname(coef(lm(Target_LRV ~ 0 + Predicted_LRV, data = d)))
+    res  <- d$Target_LRV - m * d$Predicted_LRV
+    r2   <- 1 - sum(res^2) / sum((d$Target_LRV - mean(d$Target_LRV))^2)
+    rmse <- sqrt(mean((d$Predicted_LRV - d$Target_LRV)^2))
+    tibble(n = nrow(d), slope_m = m, R2 = r2, RMSE = rmse)
+  }
+  fits <- panels |> group_by(Group) |> filter(n() >= 2) |>
+    group_modify(~ fit_one(.x)) |> ungroup() |>
+    mutate(label = sprintf("y = %.3f x\nR² = %.3f\nRMSE = %.3f\nn = %d",
+                           slope_m, R2, RMSE, n))
+
+  lim <- c(0, max(c(panels$Target_LRV, panels$Predicted_LRV), na.rm = TRUE) * 1.05)
+
+  p_lrv <- ggplot(panels, aes(Predicted_LRV, Target_LRV)) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey60") +
+    geom_abline(data = fits, aes(slope = slope_m, intercept = 0),
+                colour = "#1f5fa8", linewidth = 0.9) +
+    geom_point(aes(colour = Water), size = 2.4) +
+    geom_label(data = fits, aes(x = lim[2] * 0.02, y = lim[2], label = label),
+               hjust = 0, vjust = 1, size = 3.4, linewidth = 0,
+               fill = "white", alpha = 0.85, lineheight = 1) +
+    facet_wrap(~ Group, nrow = 1) +
+    coord_equal(xlim = lim, ylim = lim) +
+    scale_colour_manual(values = c(M1W = "#d1495b", OCWD = "#00798c")) +
+    labs(x = "Predicted 1,4-dioxane LRV", y = "Target 1,4-dioxane LRV",
+         colour = "Water") +
+    theme_minimal()
+  print(p_lrv)
+
+  dir.create("figures", showWarnings = FALSE)
+  ggsave("figures/LRV_target_vs_predicted.png", p_lrv,
+         width = 11, height = 4.2, dpi = 300, bg = "white")
+
+  knitr::kable(select(fits, -label), digits = 3,
+               col.names = c("Group", "n", "Slope m (target = m·predicted)", "R²", "RMSE (LRV)"))
+}
 ```
 
 ## Compare against the target model
